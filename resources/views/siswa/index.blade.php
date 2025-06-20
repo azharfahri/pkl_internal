@@ -15,27 +15,47 @@
 
 <body>
     <div class="card-body">
-        <a href="{{ route('siswa.create') }}" type="button" class="btn btn-primary">Add</a>
+
         <table class="table mt-3" align="center" style="width: 35%" border="1">
-        <thead>
-            <th>Nomor</th>
-            <th>Nama</th>
-            <th>Kelas</th>
-        </thead>
-        <tbody>
-            @forelse ($data as $item)
+
+            <thead>
                 <tr>
-                    <td>{{ $item['id'] }}</td>
-                    <td>{{ $item['nama'] }}</td>
-                    <td>{{ $item['kelas'] }}</td>
+                    <td>
+                        <a href="{{ route('siswa.create') }}" type="button" class="btn btn-primary">Add</a>
+                    </td>
                 </tr>
-            @empty
-                <tr>
-                    <td>Data anda tidak ada</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+                <th>Nomor</th>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Action</th>
+            </thead>
+            <tbody>
+                @forelse ($data as $item)
+                    <tr>
+                        <td>{{ $item['id'] }}</td>
+                        <td>{{ $item['nama'] }}</td>
+                        <td>{{ $item['kelas'] }}</td>
+                        {{-- <td>
+                            <form action="{{ route('siswa.destroy', $data->id) }}" method="POST">
+                                <a href="{{ route('siswa.edit', $data->id) }}" type="button"
+                                    class="btn btn-success">Edit</a>
+                                <a href="{{ route('siswa.show', $data->id) }}" type="button"
+                                    class="btn btn-warning">show</a>
+
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Apakah anda yakin?')">Delete</button>
+                            </form>
+                        </td> --}}
+                    </tr>
+                @empty
+                    <tr>
+                        <td>Data anda tidak ada</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
     <!-- Optional JavaScript; choose one of the two! -->
 
