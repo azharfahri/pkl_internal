@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -22,7 +23,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.category.create');
     }
 
     /**
@@ -30,13 +31,20 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama'=>'required|string|max:255|unique:categories,nama',
+        ]);
+        $category = new Category();
+        $category->nama = $request->nama;
+        $category->slug = Str::slug($request->nama);
+        $category->save();
+        return redirect()->route('admin.category.index')->with('success','Data Telah Berhasil Ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Category $category)
     {
         //
     }
@@ -44,24 +52,32 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Category $category)
     {
-        //
+        return view('admin.category.edit', compact('category'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Category $category)
     {
-        //
+        $request->validate([
+            'nama'=>'required|string|max:255|unique:categories,nama,'. $category->id,
+        ]);
+
+        $category->nama = $request->nama;
+        $category->slug = Str::slug($request->nama);
+        $category->save();
+        return redirect()->route('admin.category.index')->with('success','Data Telah Berhasil Diubah');;
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        return redirect()->route('admin.category.index')->with('success','Data Telah Berhasil Dihapus');;
     }
 }

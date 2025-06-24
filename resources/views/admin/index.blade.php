@@ -41,6 +41,19 @@
                     </div>
                 </div>
             </div>
+            <div class="col-lg-4 col-xxl-2 col-6">
+                <div class="card text-white text-bg-danger">
+                    <div class="card-body p-4">
+                        <span>
+                            <i class="ti ti-users fs-8"></i>
+                        </span>
+                        <h3 class="card-title mt-3 mb-0 text-white">{{ $data['totalUsers'] }}</h3>
+                        <p class="card-text text-white-50 fs-3 fw-normal">
+                            Total Orders
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

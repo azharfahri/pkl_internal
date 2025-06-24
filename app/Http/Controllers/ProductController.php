@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
 
 class ProductController extends Controller
 {
@@ -12,7 +15,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $product = Product::with('category')->orderBy('id','desc')->get();
+        return view('admin.product.index', compact('product'));
     }
 
     /**
@@ -20,7 +24,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('admin.product.create', compact('categories'));
     }
 
     /**
@@ -28,7 +33,28 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama'=> 'required|string|max:255|unique:products,nama',
+            'deskripsi'=>'required|string',
+            'harga'=>'required|numeric|min:0',
+            'stok'=>'required|integer|min:0',
+            'categori_id'=> 'required|exists:categories,id',
+            'gambar'=> 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+        $gambarPath = null;
+        if($request->hasFile('gambar')){
+            $gambarPath = $request->file('gambar')->store('products','public');
+        }
+        $product = new Product();
+        $product->nama = $request->nama;
+        $product->slug = Str::slug($request->nama);
+        $product->deskripsi = $request->deskripsi;
+        $product->harga = $request->harga;
+        $product->stok = $request->stok;
+        $product->categori_id = $request->categori_id;
+        $product->gambar = $gambarPath;
+        $product->save();
+        return redirect()->route('admin.product.index')->with('success','Data Telah Berhasil Ditambahkan');
     }
 
     /**
@@ -44,7 +70,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        $categories = Category::all();
+        return view('admin.product.edit', compact('categories','product'));
     }
 
     /**
@@ -52,7 +79,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $request->validate([
+            'nama'=> 'required|string|max:255|unique:products,nama',
+            'deskripsi'=>'required|string',
+            'harga'=>'required|numeric|min:0',
+            'stok'=>'required|integer|min:0',
+            'categori_id'=> 'required|exists:categories,id',
+            'gambar'=> 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
     }
 
     /**
