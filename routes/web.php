@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FrontController;
+use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\LatihanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SiswaController;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 //     return view('welcome');
 // });
 
-route::get('/',[FrontController::class , 'index']);
+route::get('/',[EcommerceController::class , 'index'])->name('home');
 
 //routing dasar
 Route::get('/sample',function(){
@@ -54,3 +54,17 @@ Route::group([
     Route::resource('category', CategoryController::class);
     Route::resource('product', ProductController::class);
 });
+
+Route::group([
+    'middleware' => ['auth']
+], function(){
+    Route::post('/order',[EcommerceController::class,'createOrder'])->name('order.create');
+    Route::post('/checkout',[EcommerceController::class,'checkOut'])->name('checkout');
+    Route::get('/my-order',[EcommerceController::class,'myOrders'])->name('orders.my');
+    Route::get('/my-order/{id}',[EcommerceController::class,'orderDetail'])->name('orders.detail');
+    Route::post('/order/update-quantity',[EcommerceController::class,'updateQuantity'])->name('order.update-quantity');
+    Route::post('/order/remove-item',[EcommerceController::class,'removeItem'])->name('order.remove-item');
+
+
+}
+);
