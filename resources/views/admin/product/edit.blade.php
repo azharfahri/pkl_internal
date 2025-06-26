@@ -3,6 +3,16 @@
 <div class="card">
     <div class="card-body">
         <h4>Edit Product</h4>
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+
+        @endif
         <form action="{{ route('admin.product.update', $product->id) }}" method="post" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -22,7 +32,7 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" name="nama" value="{{ $product->nama }}" required>
+                        <input type="text" class="form-control" name="nama" value="{{ $product->nama }}" >
                         <label for="tb-name">Nama product</label>
                         @error('nama')
                         {{ $message }}
@@ -31,7 +41,7 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" name="deskripsi" value="{{ $product->deskripsi }}" required>
+                        <input type="text" class="form-control" name="deskripsi" value="{{ $product->deskripsi }}" >
                         <label for="tb-name">Deskripsi</label>
                         @error('deskripsi')
                         {{ $message }}
@@ -40,7 +50,7 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating mb-3">
-                        <input type="number" class="form-control" name="harga" value="{{ $product->harga }}" required>
+                        <input type="number" class="form-control" name="harga" value="{{ $product->harga }}" >
                         <label for="tb-name">harga</label>
                         @error('harga')
                         {{ $message }}
@@ -49,7 +59,7 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating mb-3">
-                        <input type="number" class="form-control" name="stok" value="{{ $product->stok }}" required>
+                        <input type="number" class="form-control" name="stok" value="{{ $product->stok }}" >
                         <label for="tb-name">stok</label>
                         @error('stok')
                         {{ $message }}
@@ -58,7 +68,7 @@
                 </div>
                 <div class="col-md-12">
                     <div class="form-floating mb-3">
-                        <input type="file" class="form-control" name="gambar" accept="image/*" required>
+                        <input type="file" class="form-control" name="gambar" accept="image/*" >
                         <label for="tb-name">Gambar</label>
                         <small class="text-muted">
                             kosongkan jika tidak ining mengubah gambar

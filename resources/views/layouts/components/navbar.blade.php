@@ -40,7 +40,7 @@
                                                                         class="d-flex align-items-center pb-9 position-relative">
                                                                         <div
                                                                             class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                                                                            <img src="../assets/images/svgs/icon-dd-chat.svg"
+                                                                            <img src="{{ asset('assets/images/svgs/icon-dd-chat.svg') }}"
                                                                                 alt="modernize-img"
                                                                                 class="img-fluid" width="24"
                                                                                 height="24" />

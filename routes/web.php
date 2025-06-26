@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FrontController;
 use App\Http\Controllers\LatihanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SiswaController;
@@ -9,9 +10,11 @@ use App\Http\Middleware\isAdmin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+route::get('/',[FrontController::class , 'index']);
 
 //routing dasar
 Route::get('/sample',function(){
@@ -34,7 +37,7 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('/testing', function () {
-    return view('layouts.admin');
+    return view('layouts.user');
 });
 Route::get('/latihan-js', function(){
     return view('latihan-js');
