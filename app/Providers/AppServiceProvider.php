@@ -23,12 +23,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        view::composer('*', function ($view) {
+        View::composer('*', function ($view) {
             if (Auth::check()) {
                 $latestOrder = Order::with(['orderProduct.product'])
                 ->where('user_id',Auth::id())
                 ->where('status','pending')
-                ->latest()->first();
+                ->latest()
+                ->first();
 
                 $view->with('latestOrder',$latestOrder);
             }
