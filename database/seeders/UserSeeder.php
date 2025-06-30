@@ -20,8 +20,8 @@ class UserSeeder extends Seeder
             'password'=> 'admin123'
         ]);
         User::create([
-            'name'=> 'agus',
-            'email'=> 'agus@gmail.com',
+            'name'=> 'fahri',
+            'email'=> 'fahri@gmail.com',
             'is_admin'=> false,
             'password'=> 12345678
         ]);
