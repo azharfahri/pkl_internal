@@ -14,7 +14,7 @@
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">Detail Pesanan #{{ $order->id }}</h4>
-                        <span class="badge {{ $order->status == 'completed' ? 'bg-succes' : 'bg-primary' }}">
+                        <span class="badge {{ $order->status == 'completed' ? 'bg-success' : 'bg-primary' }}">
                             {{ $order->status == 'completed' ? 'Selesai' : 'Menunggu Pembayaran' }}
                         </span>
                     </div>
@@ -135,10 +135,9 @@
 
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Status :
-                                <span class="badge {{ $order->status == 'completed' ? 'bg-succes' : 'bg-primary' }}">
-                                    {{ $order->status == 'completed' ? 'Selesai' : 'Menunggu Pembayaran' }}
-                                </span>
+                                Status Pesanan
+                                <span class="badge {{ $order->status == 'completed' ? 'bg-success' : 'bg-primary' }}">
+                                    {{ $order->status == 'completed' ? 'Selesai' : 'Menunggu Pembayaran' }}</span>
                             </li>
                         </ul>
                         @if ($order->status == 'pending')

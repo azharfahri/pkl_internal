@@ -94,8 +94,42 @@ class EcommerceController extends Controller
         return view('orders.detail' , compact('order'));
     }
 
-    public function updateQuantity(Request $request){
+    public function updateQuantity(Request $request)
+    {
+            try {$request->validate([
+                'order_product_id' => 'required|exists:order_products,id',
+                'quantity'         => 'required|integer|min:1',
+            ]);
 
+            DB::transaction(function () use ($request) {
+                $orderProduct = OrderProduct::findOrFail($request->order_product_id);
+                $product      = Product::findOrFail($orderProduct->product_id);
+                $order        = Order::findOrFail($orderProduct->order_id);
+
+                if($order->user_id != Auth::user()->id){
+                    throw new \Exception('Akses Tidak Sah untuk pesanan ini.');
+                }
+                if($order->status !== 'pending'){
+                    throw new \Exception('Tidak dapat mengubah jumlah produk pada pesanan yang sudah selesai atau dibatalkan.');
+                }
+                if ($request->quantity > $product->stok) {
+                    throw new \Exception("Maaf, hanya tersedia {$product->stok} barang untuk {$product->nama}.");
+                }
+
+                $oldSubtotal = $orderProduct->subtotal;
+                $newSubtotal = $product->harga * $request->quantity;
+
+                $orderProduct->quantity = $request->quantity;
+                $orderProduct->subtotal = $newSubtotal;
+                $orderProduct->save();
+
+                $order->total_harga = $order->total_harga - $oldSubtotal + $newSubtotal;
+                $order->save();
+            });
+            return redirect()->back()->with("success",'Jumlah Produk berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     public function removeItem(Request $request){

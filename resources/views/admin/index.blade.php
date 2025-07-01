@@ -47,7 +47,7 @@
                         <span>
                             <i class="ti ti-users fs-8"></i>
                         </span>
-                        <h3 class="card-title mt-3 mb-0 text-white">{{ $data['totalUsers'] }}</h3>
+                        <h3 class="card-title mt-3 mb-0 text-white">{{ $data['totalOrders'] }}</h3>
                         <p class="card-text text-white-50 fs-3 fw-normal">
                             Total Orders
                         </p>

@@ -55,7 +55,7 @@
             </div>
         </div>
     </section>
-    
+
     <section class="py-5">
         <div class="container-fluid">
             <div class="row">
@@ -88,6 +88,11 @@
                                                 <span class="rating">
                                                     <svg width="10" height="10" class="text-primary"></svg>
                                                     {{ $item->category->nama }}
+                                                </span><br>
+                                                <span class="qty">Stok</span>
+                                                <span class="rating">
+                                                    <svg width="10" height="10" class="text-primary"></svg>
+                                                    {{ $item->stok }}
                                                 </span>
                                                 <span class="price">Rp.
                                                     {{ number_format($item->harga, 0, ',', '.') }}</span>

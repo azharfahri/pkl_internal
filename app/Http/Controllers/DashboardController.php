@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\User;
 
 class DashboardController extends Controller
@@ -13,7 +14,8 @@ class DashboardController extends Controller
         $data = [
         'totalProducts' => Product::count(),
         'totalCategories' => Category::count(),
-        'totalUsers' => User::count()
+        'totalUsers' => User::count(),
+        'totalOrders' => Order::count()
     ];
     return view('admin.index', compact('data'));
 
