@@ -9,23 +9,25 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use PhpParser\Node\Stmt\Return_;
 
 class EcommerceController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $category = Category::all();
         $product = Product::all();
-        return view('welcome',  compact('category','product'));
+        return view('welcome',  compact('category', 'product'));
     }
 
-    public function createOrder(Request $request){
+    public function createOrder(Request $request)
+    {
         try {
-            DB::transaction(function () use ($request){
+            DB::transaction(function () use ($request) {
                 $existingPendingOrder = Order::where('user_id', Auth::id())
-                ->where('status','pending')
-                ->latest()
-                ->first();
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
                 // jika tidak ada order pending, buat order baru
 
                 if (!$existingPendingOrder) {
@@ -34,7 +36,7 @@ class EcommerceController extends Controller
                         'total_harga' => 0,
                         'status' => 'pending',
                     ]);
-                }else {
+                } else {
                     $order = $existingPendingOrder;
                 }
                 $totalHarga = 0;
@@ -47,8 +49,8 @@ class EcommerceController extends Controller
                     $subtotal = $product->harga * $item['quantity'];
 
                     $existingItem = OrderProduct::where('order_id', $order->id)
-                    ->where('product_id', $product->id)
-                    ->first();
+                        ->where('product_id', $product->id)
+                        ->first();
 
                     if ($existingItem) {
                         $newQuantity = $existingItem->quantity + $item['quantity'];
@@ -59,7 +61,7 @@ class EcommerceController extends Controller
                         $existingItem->subtotal = $newSubtotal;
                         $existingItem->save();
 
-                        $totalHarga = $totalHarga - $oldSubtotal + $newSubtotal ;
+                        $totalHarga = $totalHarga - $oldSubtotal + $newSubtotal;
                     } else {
                         OrderProduct::create([
                             'order_id' => $order->id,
@@ -69,34 +71,41 @@ class EcommerceController extends Controller
                         ]);
                         $totalHarga += $subtotal;
                     }
-
                 }
                 $order->total_harga = $totalHarga;
                 $order->save();
             });
             $productName = Product::findOrFail($request->items[0]['product_id'])->nama;
             $quantity = $request->items[0]['quantity'];
-            return redirect()->route('home')->with('success' , "$quantity x $productName Berhasil Ditambahkan ke keranjang");
+            return redirect()->route('home')->with('success', "$quantity x $productName Berhasil Ditambahkan ke keranjang");
         } catch (\Exception $e) {
-            return redirect()->route('home')->with('error', 'Error:' , $e->getMessage());
+            return redirect()->route('home')->with('error', 'Error:', $e->getMessage());
         }
     }
 
-    public function myOrders(){
+    public function myOrders()
+    {
+        $orders = Order::with(['orderProduct.product'])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
+        return view('orders.index', compact('orders'));
     }
 
-    public function orderDetail($id){
+    public function orderDetail($id)
+    {
         $order = Order::with(['orderProduct.product'])
-        ->where('user_id', Auth::id())
-        ->findOrFail($id);
+            ->where('user_id', Auth::id())
+            ->findOrFail($id);
 
-        return view('orders.detail' , compact('order'));
+        return view('orders.detail', compact('order'));
     }
 
     public function updateQuantity(Request $request)
     {
-            try {$request->validate([
+        try {
+            $request->validate([
                 'order_product_id' => 'required|exists:order_products,id',
                 'quantity'         => 'required|integer|min:1',
             ]);
@@ -106,10 +115,10 @@ class EcommerceController extends Controller
                 $product      = Product::findOrFail($orderProduct->product_id);
                 $order        = Order::findOrFail($orderProduct->order_id);
 
-                if($order->user_id != Auth::user()->id){
+                if ($order->user_id != Auth::user()->id) {
                     throw new \Exception('Akses Tidak Sah untuk pesanan ini.');
                 }
-                if($order->status !== 'pending'){
+                if ($order->status !== 'pending') {
                     throw new \Exception('Tidak dapat mengubah jumlah produk pada pesanan yang sudah selesai atau dibatalkan.');
                 }
                 if ($request->quantity > $product->stok) {
@@ -126,19 +135,65 @@ class EcommerceController extends Controller
                 $order->total_harga = $order->total_harga - $oldSubtotal + $newSubtotal;
                 $order->save();
             });
-            return redirect()->back()->with("success",'Jumlah Produk berhasil diperbarui');
+            return redirect()->back()->with("success", 'Jumlah Produk berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function removeItem(Request $request){
+    public function removeItem(Request $request)
+    {
+        try {
+            $request->validate([
+                'order_product_id' => 'required|exists:order_products,id',
+            ]);
 
+            $orderDeleted = false;
+            $message = null;
+
+            DB::transaction(function () use ($request, &$orderDeleted, &$message) {
+                $orderProduct = OrderProduct::findOrFail($request->order_product_id);
+                $order = Order::findOrFail($orderProduct->order_id);
+                $productName = Product::findOrFail($orderProduct->product_id)->nama;
+
+                if ($order->user_id !== Auth::id()) {
+                    throw new \Exception('Akses tidak sah untuk pesanan ini.');
+                }
+
+                if ($order->status !== 'pending') {
+                    throw new \Exception('Tidak dapat merubah pesanan yang telah selesai.');
+                }
+
+                $orderId = $order->id;
+                $order->total_harga -= $orderProduct->subtotal;
+                $order->save();
+
+                $orderProduct->delete();
+
+                $remainingCount = OrderProduct::where('order_id', $orderId)->count();
+
+                if ($remainingCount === 0) {
+                    $order->delete();
+                    $orderDeleted = true;
+                    $message = 'Pesanan dihapus karena tidak ada produk di dalamnya.';
+                }
+            });
+
+            if ($orderDeleted) {
+                return redirect()->route('order.my')->with('info', $message);
+            }
+
+            return redirect()->back()->with('success', 'Produk berhasil di hapus dari pesanan');
+        } catch (\Exception $e) {
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
     }
 
-    public function checkOut(Request $request){
-        try
-        {
+    public function checkOut(Request $request)
+    {
+        try {
             return DB::transaction(function () use ($request) {
                 $order = Order::with('orderProduct.product')->findOrFail($request->order_id);
                 if ($order->user_id != Auth::id()) {
@@ -178,4 +233,3 @@ class EcommerceController extends Controller
         }
     }
 }
-
