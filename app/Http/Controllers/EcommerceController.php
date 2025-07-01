@@ -103,32 +103,45 @@ class EcommerceController extends Controller
     }
 
     public function checkOut(Request $request){
-        try {
-            return DB::transaction(function () use ($request){
+        try
+        {
+            return DB::transaction(function () use ($request) {
                 $order = Order::with('orderProduct.product')->findOrFail($request->order_id);
-
-                if ($order->user_id !== Auth::id()) {
-                    return redirect()->route('orders.my')->with('error', 'Akses tidak sah untuk pesanan ini');
+                if ($order->user_id != Auth::id()) {
+                    return redirect()->route('orders.my')->with('error', 'Akses Tidak Sah untuk pesanan ini.');
                 }
 
-                if ($order->status === 'completed') {
+                if ($order->status !== 'pending') {
                     return redirect()->route('orders.detail', $order->id)->with('error', 'Pesanan ini sudah selesai');
-
                 }
 
                 if ($order->orderProduct->isEmpty()) {
-                    return redirect()->route('orders.my')->with('error', 'Tidak dapat melakukan checkout untuk pesanan ini');
-
+                    return redirect()->route('orders.my')->with('error', 'Tidak dapat melakukan checkout pada pesanan yang kosong.');
                 }
 
-                // $insufficientStock = [];
-                // foreach ($order->orderProduct as $item) {
-                //     $product =
-                // }
+                $insufficientStock = [];
+                foreach ($order->orderProduct as $item) {
+                    $product = $item->product;
+                    if ($item->stok < $product->quantity) {
+                        $insufficientStock[] = "($product->nama) (requested: ($item->quantity), available: ($product->stok))";
+                    }
+                }
+                if (! empty($insufficientStock)) {
+                    $productList = implode(', ', $insufficientStock);
+                    return redirect()->route('orders.detail', $order->id)->with('error', "Stok tidak mencukupi untuk produk berikut: {$productList}");
+                }
+                foreach ($order->orderProduct as $item) {
+                    $product = $item->product;
+                    $product->stok -= $item->quantity;
+                    $product->save();
+                }
+                $order->status = 'completed';
+                $order->save();
+                return redirect()->route('orders.detail', $order->id)->with('success', 'Pembayaran Berhasil, terima kasih telah checkout!');
             });
         } catch (\Exception $e) {
-            return redirect()->route('orders.my')
-            ->with('error', 'Terjadi kesalahan saat checkout:' . $e->getMessage());
+            return redirect()->route('orders.my')->with('error', 'Terjadi Kesalahan saat checkout : ' . $e->getMessage());
         }
     }
 }
+
