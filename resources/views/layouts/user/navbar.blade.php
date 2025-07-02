@@ -66,7 +66,7 @@
             </h4>
             <form role="search" action="index.html" method="get" class="d-flex mt-3 gap-0">
                 <input class="form-control rounded-start rounded-0 bg-light" type="email"
-                    placeholder="What are you looking for?" aria-label="What are you looking for?">
+                    placeholder="Kamu nyari produk apa?" aria-label="Kamu nyari produk apa?">
                 <button class="btn btn-dark rounded-end rounded-0" type="submit">Pencarian</button>
             </form>
         </div>
